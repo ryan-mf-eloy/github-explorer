@@ -12,9 +12,14 @@ Search GitHub repositories with a beautiful explorer!
 
 # Init Project
 <pre>
-  # Dependencies Download
-  $ yarn
+  <code>
+    # Dependencies Download
+    $ yarn
 
-  # Run App
-  $ yarn start
-<pre>
+    # Run App
+    $ yarn start
+   </code>
+</pre>
+
+# LICENSE(MIT)
+Link -> https://github.com/ryan-mf-eloy/github-explorer/blob/main/LICENSE

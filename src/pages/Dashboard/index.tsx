@@ -4,9 +4,11 @@ import api from '../../services/api';
 import logoLight from '../../assets/logo-light.svg';
 import logoDark from '../../assets/logo-dark.svg';
 
-import { FiChevronRight, FiSearch } from 'react-icons/fi';
-import { Title, Form, Repositories } from './styles';
+import { FiChevronRight, FiFrown, FiSearch } from 'react-icons/fi';
+import { Title, Form, Repositories, Error } from './styles';
 import getThemePreference from '../../utils/getThemePreference';
+import isEmpty from '../../utils/isEmpty';
+import { Link } from 'react-router-dom';
 
 interface Repository {
   full_name: string;
@@ -18,47 +20,77 @@ interface Repository {
 }
 
 const Dashboard: React.FC = () => {
+  const [repositories, setRepositories] = useState<Repository[]>(() => {
+    const storagedRepositories = localStorage.getItem('@GithubExplorer:repositories');
+
+    return storagedRepositories
+     ? JSON.parse(storagedRepositories)
+     : [];
+  });
   const [newRepo, setNewRepo] = useState('');
-  const [repositories, setRepositories] = useState<Repository[]>([]);
+  const [inputError, setInputError] = useState('');
   const [themePreference, setThemePreference] = useState<string>('dark');
+
+  const handleClear = (): void => {
+    setNewRepo('');
+    setInputError('');
+  }
 
   const handleAddRepository = async(event:FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();
 
-    const response = await api.get<Repository>(`repos/${newRepo}`);
-    const repository = response.data;
-    
-    setRepositories([...repositories, repository]);
-    setNewRepo('');
+    if(isEmpty(newRepo))
+      return setInputError('Insira o nome do repositório!');
+
+    try {
+      const response = await api.get<Repository>(`repos/${newRepo}`);
+      const repository = response.data;
+      
+      setRepositories([...repositories, repository]);
+      handleClear();
+    } catch(error) {
+      setInputError('Ooops! Parece que houve um erro na busca por esse repositório :/');
+    }
   }
 
- useEffect(() => {
-   const themePreference = getThemePreference();
+  useEffect(() => {
+    const handleThemePreference = () => {
+      const definedThemePreference = getThemePreference();
+      if(definedThemePreference) return setThemePreference(definedThemePreference);
+    }
+    handleThemePreference();
+  });
 
-   if(themePreference) return setThemePreference(themePreference);
- })
+  useEffect(() => {
+    const saveRepositories = () => localStorage
+      .setItem("@GithubExplorer:repositories", JSON.stringify(repositories));
+
+   saveRepositories();
+  }, [repositories]);
 
   return (
     <>
-      { themePreference === 'dark'
+      { 
+        themePreference === 'dark'
          ? <img src={logoLight} alt="Github Explorer" />
          : <img src={logoDark} alt="Github Explorer" />
       }
       <Title>Explore repositórios no Github</Title>
 
-      <Form onSubmit={handleAddRepository}>
-        <input placeholder="Digite o nome do repositório"
+      <Form hasError={!!inputError} onSubmit={handleAddRepository}>
+        <input placeholder="Digite o nome do repositório. Ex: autor/nome-do-repositório"
           value={newRepo}
           onChange={({ target }) => setNewRepo(target.value)}
-          required
         />
         <button type="submit"><FiSearch size="25"/></button>
       </Form>
 
+      {isEmpty(inputError) === false && <Error><FiFrown size="20"/> {inputError}</Error>}
+
       <Repositories>
         { repositories.map(repository => {
           return (
-            <a href="#" key={repository.full_name}>
+            <Link to={`/repositories/${repository.full_name}`} key={repository.full_name}>
               <img
                 src={repository.owner.avatar_url}
                 alt={repository.owner.login}
@@ -68,7 +100,7 @@ const Dashboard: React.FC = () => {
                 <p>{repository.description}</p>
               </div>
               <FiChevronRight size="25"/>
-            </a>
+            </Link>
           ); }) }
       </Repositories>
     </>

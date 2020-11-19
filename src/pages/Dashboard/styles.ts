@@ -1,6 +1,9 @@
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { shade } from 'polished';
-import themes from '../../styles/themes';
+
+interface FormProps {
+  hasError: boolean;
+}
 
 export const Title = styled.h1`
   font-size: 48px;
@@ -10,7 +13,7 @@ export const Title = styled.h1`
   line-height: 56px;
 `;
 
-export const Form = styled.form`
+export const Form = styled.form<FormProps>`
   margin-top: 40px;
   max-width: 700px;
   display: flex;
@@ -18,14 +21,16 @@ export const Form = styled.form`
 
   input {
     flex: 1;
+    border: none;
+    border-left: 5px solid transparent;
     height: 70px;
     padding: 0 24px;
-    border: none;
     border-radius: 5px 0 0 5px;
+    background: ${({theme}) => theme.primaryColor};
     color: ${({theme}) => theme.secondaryColor};
     box-shadow: 0 0 40px rgba(0,0,0,.05);
 
-    background: ${({theme}) => theme.primaryColor};
+    ${({ hasError }) => hasError && css`border-color: #ff5555`};
 
     &::placeholder{
       color: #a8a8b3;
@@ -108,9 +113,9 @@ export const SetThemeButton = styled.button`
   border: none;
   border-radius: 5px;
   background: #2C2F33;
-  position: absolute;
+  position: fixed;
   right: 30px;
-  top: 30px;
+  bottom: 30px;
   box-shadow: 0 0 20px rgba(0,0,0,.05);
   -webkit-transition: background-color .2s;
 
@@ -118,3 +123,20 @@ export const SetThemeButton = styled.button`
     background: ${shade(0.2, `#2C2F33`)};
   }
 `;
+
+export const Error = styled.span`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  color: #ff5555;
+  background: #ff55551a;
+  border-radius: 5px;
+  padding: 10px;
+  margin-top: 20px;
+  max-width: 540px;
+
+  svg {
+    margin-right: 10px
+  }
+`;
+

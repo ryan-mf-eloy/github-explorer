@@ -10,6 +10,10 @@ export default createGlobalStyle<{theme: typeof themes}>`
     box-sizing: border-box;
   }
 
+  ::selection {
+    background: ${({theme}) => theme.textColor}
+  }
+
   body{
     background: ${({theme}) => theme.backgroundColor} url(${githubBg}) no-repeat 70% top;
     -webkit-font-smoothing: antialiased;
@@ -21,6 +25,10 @@ export default createGlobalStyle<{theme: typeof themes}>`
 
   button{
     cursor: pointer;
+  }
+
+  ul {
+    list-style: none;
   }
 
   #root{
